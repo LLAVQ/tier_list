@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grish Tier List</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1c1e21;
+        }
+
+        .tier-list-container {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .tier-row {
+            display: table-row;
+        }
+
+        .tier-label-container,
+        .tier-drop-zone {
+            display: table-cell;
+            vertical-align: middle;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .tier-label-container {
+            width: 150px;
+            font-weight: bold;
+            text-align: center;
+            color: #fff;
+        }
+
+        .tier-drop-zone {
+            min-height: 80px;
+            width: 100%;
+        }
+
+        .great { background-color: #ff7979; }
+        .good { background-color: #ffb142; }
+        .ok { background-color: #ffeb3b; }
+        .meh { background-color: #7bed9f; }
+        .yuck { background-color: #70a1ff; }
+
+        .items-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            border-top: 2px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .item {
+            display: inline-block;
+            background-color: #e4e6eb;
+            border: 1px solid #ccd0d5;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 0 5px;
+            cursor: grab;
+            position: relative;
+        }
+
+        .item:hover .delete-btn {
+            display: block;
+        }
+
+        .item-name {
+            display: inline-block;
+            cursor: text;
+        }
+
+        .item-input {
+            border: 1px solid #ccd0d5;
+            padding: 5px;
+            font-size: 1em;
+        }
+
+        .delete-btn {
+            display: none;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            background-color: #42b72a;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            cursor: pointer;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Grish Tier List</h1>
+
+    <div class="tier-list-container">
+        <div class="tier-row">
+            <div class="tier-label-container great">GREAT</div>
+            <div class="tier-drop-zone" data-tier="great"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label-container good">GOOD</div>
+            <div class="tier-drop-zone" data-tier="good"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label-container ok">OK</div>
+            <div class="tier-drop-zone" data-tier="ok"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label-container meh">MEH</div>
+            <div class="tier-drop-zone" data-tier="meh"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label-container yuck">YUCK</div>
+            <div class="tier-drop-zone" data-tier="yuck"></div>
+        </div>
+    </div>
+
+    <div class="items-container" id="items-container">
+        <button class="add-btn" id="add-btn">+</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const itemsContainer = document.getElementById('items-container');
+            const addBtn = document.getElementById('add-btn');
+            const tierDropZones = document.querySelectorAll('.tier-drop-zone');
+
+            let draggedItem = null;
+
+            function createNewItem(name = 'New Item') {
+                const item = document.createElement('div');
+                item.classList.add('item');
+                item.setAttribute('draggable', 'true');
+
+                const itemName = document.createElement('span');
+                itemName.classList.add('item-name');
+                itemName.textContent = name;
+                item.appendChild(itemName);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.textContent = 'x';
+                item.appendChild(deleteBtn);
+
+                itemsContainer.insertBefore(item, addBtn);
+                addDragAndDropListeners(item);
+                addEditListener(itemName);
+                addDeleteListener(deleteBtn);
+            }
+
+            function addDragAndDropListeners(item) {
+                item.addEventListener('dragstart', (e) => {
+                    draggedItem = e.target;
+                    setTimeout(() => {
+                        e.target.style.display = 'none';
+                    }, 0);
+                });
+
+                item.addEventListener('dragend', (e) => {
+                    setTimeout(() => {
+                        draggedItem.style.display = 'inline-block';
+                        draggedItem = null;
+                    }, 0);
+                });
+            }
+
+            tierDropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedItem) {
+                        e.target.closest('.tier-drop-zone').appendChild(draggedItem);
+                    }
+                });
+            });
+            
+            itemsContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            itemsContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (draggedItem) {
+                    itemsContainer.insertBefore(draggedItem, addBtn);
+                }
+            });
+
+
+            function addDeleteListener(btn) {
+                btn.addEventListener('click', (e) => {
+                    e.target.parentElement.remove();
+                });
+            }
+
+            function addEditListener(span) {
+                span.addEventListener('click', (e) => {
+                    const currentName = e.target.textContent;
+                    const input = document.createElement('input');
+                    input.classList.add('item-input');
+                    input.value = currentName;
+
+                    e.target.style.display = 'none';
+                    e.target.parentElement.insertBefore(input, e.target);
+                    input.focus();
+
+                    input.addEventListener('blur', () => {
+                        e.target.textContent = input.value;
+                        e.target.style.display = 'inline-block';
+                        input.remove();
+                    });
+
+                    input.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter') {
+                            input.blur();
+                        }
+                    });
+                });
+            }
+
+            addBtn.addEventListener('click', () => {
+                createNewItem();
+            });
+
+            // Create some initial items
+            ['Item 1', 'Item 2', 'Item 3'].forEach(name => createNewItem(name));
+        });
+    </script>
+
+</body>
+</html>
