@@ -5,19 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grish Tier List</title>
     <style>
+        /* Basic Setup */
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #1c1e21;
+            --card-bg-color: #fff;
+            --card-border-color: #ccc;
+            --item-bg-color: #e4e6eb;
+            --item-border-color: #ccd0d5;
+            --tier-border-color: #ddd;
+
+            /* Tier Colors */
+            --great-color: #ff7979;
+            --good-color: #ffb142;
+            --ok-color: #ffeb3b;
+            --meh-color: #7bed9f;
+            --yuck-color: #70a1ff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #18191a;
+            --text-color: #e4e6eb;
+            --card-bg-color: #242526;
+            --card-border-color: #3a3b3c;
+            --item-bg-color: #3a3b3c;
+            --item-border-color: #555;
+            --tier-border-color: #444;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         h1 {
             text-align: center;
-            color: #1c1e21;
+            color: var(--text-color);
         }
 
+        /* Theme Switch */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 34px;
+            position: relative;
+            width: 60px;
+        }
+        .theme-switch input {
+            display:none;
+        }
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            background-color: #fff;
+            bottom: 4px;
+            content: "";
+            height: 26px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 26px;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Tier List */
         .tier-list-container {
             display: table;
             width: 100%;
@@ -33,7 +109,7 @@
         .tier-drop-zone {
             display: table-cell;
             vertical-align: middle;
-            border: 1px solid #ddd;
+            border: 1px solid var(--tier-border-color);
             padding: 10px;
         }
 
@@ -49,36 +125,40 @@
             width: 100%;
         }
 
-        .great { background-color: #ff7979; }
-        .good { background-color: #ffb142; }
-        .ok { background-color: #ffeb3b; }
-        .meh { background-color: #7bed9f; }
-        .yuck { background-color: #70a1ff; }
+        .great { background-color: var(--great-color); }
+        .good { background-color: var(--good-color); }
+        .ok { background-color: var(--ok-color); color: #333} /* For better readability on yellow */
+        .meh { background-color: var(--meh-color); }
+        .yuck { background-color: var(--yuck-color); }
 
+        /* Items at the Bottom */
         .items-container {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: #fff;
-            border-top: 2px solid #ccc;
+            background-color: var(--card-bg-color);
+            border-top: 2px solid var(--card-border-color);
             padding: 10px;
             box-sizing: border-box;
             display: flex;
             align-items: center;
             overflow-x: auto;
             white-space: nowrap;
+            transition: background-color 0.3s, border-top-color 0.3s;
         }
 
         .item {
             display: inline-block;
-            background-color: #e4e6eb;
-            border: 1px solid #ccd0d5;
+            background-color: var(--item-bg-color);
+            border: 1px solid var(--item-border-color);
             border-radius: 8px;
             padding: 10px 15px;
             margin: 0 5px;
             cursor: grab;
             position: relative;
+            color: var(--text-color);
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .item:hover .delete-btn {
@@ -91,7 +171,9 @@
         }
 
         .item-input {
-            border: 1px solid #ccd0d5;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--item-border-color);
             padding: 5px;
             font-size: 1em;
         }
@@ -128,6 +210,13 @@
 </head>
 <body>
 
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider round"></div>
+        </label>
+    </div>
+
     <h1>Grish Tier List</h1>
 
     <div class="tier-list-container">
@@ -159,6 +248,35 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Theme Switcher Logic
+            const themeToggle = document.getElementById('checkbox');
+            const currentTheme = localStorage.getItem('theme');
+
+            function setDarkMode(isDark) {
+                if (isDark) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.checked = true;
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.checked = false;
+                }
+            }
+
+            if (currentTheme) {
+                setDarkMode(currentTheme === 'dark');
+            } else {
+                // If no theme is saved, check the system preference
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setDarkMode(prefersDark);
+            }
+
+            themeToggle.addEventListener('change', (e) => {
+                setDarkMode(e.target.checked);
+            });
+
+            // Tier List App Logic
             const itemsContainer = document.getElementById('items-container');
             const addBtn = document.getElementById('add-btn');
             const tierDropZones = document.querySelectorAll('.tier-drop-zone');
@@ -194,9 +312,11 @@
                     }, 0);
                 });
 
-                item.addEventListener('dragend', (e) => {
+                item.addEventListener('dragend', () => {
                     setTimeout(() => {
-                        draggedItem.style.display = 'inline-block';
+                        if (draggedItem) {
+                           draggedItem.style.display = 'inline-block';
+                        }
                         draggedItem = null;
                     }, 0);
                 });
@@ -209,12 +329,12 @@
 
                 zone.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    if (draggedItem) {
-                        e.target.closest('.tier-drop-zone').appendChild(draggedItem);
+                    if (draggedItem && e.target.classList.contains('tier-drop-zone')) {
+                        e.target.appendChild(draggedItem);
                     }
                 });
             });
-            
+
             itemsContainer.addEventListener('dragover', (e) => {
                 e.preventDefault();
             });
@@ -225,7 +345,6 @@
                     itemsContainer.insertBefore(draggedItem, addBtn);
                 }
             });
-
 
             function addDeleteListener(btn) {
                 btn.addEventListener('click', (e) => {
@@ -244,14 +363,21 @@
                     e.target.parentElement.insertBefore(input, e.target);
                     input.focus();
 
-                    input.addEventListener('blur', () => {
-                        e.target.textContent = input.value;
+                    const saveChanges = () => {
+                        e.target.textContent = input.value || "Untitled"; // Prevent empty names
                         e.target.style.display = 'inline-block';
-                        input.remove();
-                    });
+                        if (input.parentElement) {
+                            input.remove();
+                        }
+                    };
+                    
+                    input.addEventListener('blur', saveChanges);
 
                     input.addEventListener('keydown', (event) => {
                         if (event.key === 'Enter') {
+                            input.blur();
+                        } else if (event.key === 'Escape') {
+                            input.value = currentName; // Revert changes
                             input.blur();
                         }
                     });
@@ -263,7 +389,7 @@
             });
 
             // Create some initial items
-            ['Item 1', 'Item 2', 'Item 3'].forEach(name => createNewItem(name));
+            ['RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE'].forEach(name => createNewItem(name));
         });
     </script>
 
